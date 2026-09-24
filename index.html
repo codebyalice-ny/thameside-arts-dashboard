@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thameside Arts Trust — Supporter &amp; Sector Dashboard</title>
+<title>Thameside Arts Trust: Supporter &amp; Sector Dashboard</title>
 <style>
   :root {
     color-scheme: light;
@@ -121,8 +121,8 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Thameside Arts Trust — Supporter &amp; Sector Dashboard</h1>
-    <p class="subtitle">Portfolio data project by Alice Nguyen — SQL data-quality audit, cleaning, and analysis, presented for a Power BI-style dashboard.</p>
+    <h1>Thameside Arts Trust: Supporter &amp; Sector Dashboard</h1>
+    <p class="subtitle">Portfolio data project by Alice Nguyen. SQL data-quality audit, cleaning, and analysis, presented for a Power BI-style dashboard.</p>
     <span class="badge synthetic">Supporter data: synthetic (fictional charity, generated for practice)</span>
     <span class="badge real">Museum sector benchmark: real (ALVA, 2022–2024)</span>
   </header>
@@ -147,7 +147,7 @@
       <div class="legend" id="legend-status"></div>
     </div>
     <div class="card">
-      <h2>UK museum &amp; gallery sector — total visits, 2022–2024</h2>
+      <h2>UK museum &amp; gallery sector: total visits, 2022–2024</h2>
       <p class="desc">Real data · 20 institutions reporting each year · source: ALVA</p>
       <svg id="chart-trend" viewBox="0 0 480 220"></svg>
     </div>
@@ -159,7 +159,7 @@
   </div>
 
   <footer>
-    Supporter/CRM data is synthetic — generated for this practice project to demonstrate database administration
+    Supporter/CRM data is synthetic, generated for this practice project to demonstrate database administration
     and data-quality skills; it does not represent a real organisation or real individuals.
     Museum &amp; gallery visitor figures are real, sourced from the Association of Leading Visitor Attractions (ALVA)
     as reported by <a href="https://museumsandheritage.com" target="_blank" rel="noopener">Museums + Heritage Advisor</a> (2023 and 2024 annual releases).
@@ -247,7 +247,7 @@ hBarChart('chart-region', DATA.region, {valueFmt: v => String(v)});
     el.addEventListener('mouseleave', hideTip);
   });
   document.getElementById('legend-status').innerHTML = DATA.status.map((r,i) =>
-    `<span><span class="sw status-${(i%3)+1}" style="background:var(--series-${(i%3)+1})"></span>${r.label} — ${r.value}</span>`
+    `<span><span class="sw status-${(i%3)+1}" style="background:var(--series-${(i%3)+1})"></span>${r.label}: ${r.value}</span>`
   ).join('');
 })();
 
