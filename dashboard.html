@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thameside Arts Trust — Supporter &amp; Sector Dashboard</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --muted:          #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6; /* blue */
+    --series-2:       #eb6834; /* orange */
+    --series-3:       #1baf7a; /* aqua */
+    --good:           #006300;
+    --critical:       #e34948;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --muted:          #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #d95926;
+      --series-3:       #199e70;
+      --good:           #0ca30c;
+      --critical:       #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted:          #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+    --series-3:       #199e70;
+    --good:           #0ca30c;
+    --critical:       #e66767;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 16px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  header { margin-bottom: 20px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; margin: 0; }
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .02em;
+    padding: 2px 8px; border-radius: 999px; margin-right: 6px; margin-top: 8px;
+  }
+  .badge.real { background: rgba(27,175,122,0.15); color: var(--series-3); }
+  .badge.synthetic { background: rgba(235,104,52,0.15); color: var(--series-2); }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi .label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .kpi .value { font-size: 24px; font-weight: 700; }
+  .kpi .sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; margin-bottom: 16px;
+  }
+  .card h2 { font-size: 14px; margin: 0 0 2px; }
+  .card .desc { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+
+  svg { width: 100%; height: auto; overflow: visible; }
+  .bar { fill: var(--series-1); }
+  .bar.neg { fill: var(--critical); }
+  .bar:hover { opacity: 0.85; }
+  .axis-label { fill: var(--muted); font-size: 10px; }
+  .value-label { fill: var(--text-primary); font-size: 11px; font-weight: 600; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--baseline); stroke-width: 1; }
+  .line-path { fill: none; stroke: var(--series-1); stroke-width: 2; }
+  .dot { fill: var(--series-1); }
+  .status-1 { fill: var(--series-1); }
+  .status-2 { fill: var(--series-2); }
+  .status-3 { fill: var(--series-3); }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--text-secondary); margin-top: 8px; flex-wrap: wrap; }
+  .legend .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--text-primary); color: var(--surface-1);
+    font-size: 11px; padding: 4px 8px; border-radius: 6px; opacity: 0; transition: opacity .1s; white-space: nowrap;
+    z-index: 10;
+  }
+  footer { font-size: 11px; color: var(--muted); margin-top: 12px; line-height: 1.6; }
+  a { color: var(--series-1); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Thameside Arts Trust — Supporter &amp; Sector Dashboard</h1>
+    <p class="subtitle">Portfolio data project by Alice Nguyen — SQL data-quality audit, cleaning, and analysis, presented for a Power BI-style dashboard.</p>
+    <span class="badge synthetic">Supporter data: synthetic (fictional charity, generated for practice)</span>
+    <span class="badge real">Museum sector benchmark: real (ALVA, 2022–2024)</span>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Funds raised by membership tier</h2>
+      <p class="desc">Cleaned supporter data · £ total raised, current tier</p>
+      <svg id="chart-tier" viewBox="0 0 480 260"></svg>
+    </div>
+    <div class="card">
+      <h2>Supporters by region</h2>
+      <p class="desc">Cleaned supporter data · count of supporters</p>
+      <svg id="chart-region" viewBox="0 0 480 260"></svg>
+    </div>
+    <div class="card">
+      <h2>Supporter engagement status</h2>
+      <p class="desc">Active vs lapsed (24m+) vs never donated</p>
+      <svg id="chart-status" viewBox="0 0 480 220"></svg>
+      <div class="legend" id="legend-status"></div>
+    </div>
+    <div class="card">
+      <h2>UK museum &amp; gallery sector — total visits, 2022–2024</h2>
+      <p class="desc">Real data · 20 institutions reporting each year · source: ALVA</p>
+      <svg id="chart-trend" viewBox="0 0 480 220"></svg>
+    </div>
+    <div class="card" style="grid-column: 1 / -1;">
+      <h2>Museum &amp; gallery visitor change, 2023 → 2024</h2>
+      <p class="desc">Top 5 gainers and bottom 5 (declines), % change year-over-year · real data, source: ALVA</p>
+      <svg id="chart-yoy" viewBox="0 0 900 260"></svg>
+    </div>
+  </div>
+
+  <footer>
+    Supporter/CRM data is synthetic — generated for this practice project to demonstrate database administration
+    and data-quality skills; it does not represent a real organisation or real individuals.
+    Museum &amp; gallery visitor figures are real, sourced from the Association of Leading Visitor Attractions (ALVA)
+    as reported by <a href="https://museumsandheritage.com" target="_blank" rel="noopener">Museums + Heritage Advisor</a> (2023 and 2024 annual releases).
+  </footer>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const DATA = {"kpis": {"supporters": 346, "total_raised": 1435893.0, "issues_found": 76, "duplicates_removed": 29, "museum_2024_total": 61231129}, "tier": [{"label": "Major Donor", "value": 1000987.0}, {"label": "Corporate Partner", "value": 317174.0}, {"label": "Fellow", "value": 78649.0}, {"label": "Patron", "value": 31236.0}, {"label": "Friend", "value": 7846.0}], "region": [{"label": "Scotland", "value": 61}, {"label": "South East", "value": 59}, {"label": "Yorkshire and the Humber", "value": 42}, {"label": "North West", "value": 40}, {"label": "East of England", "value": 25}, {"label": "Wales", "value": 22}, {"label": "West Midlands", "value": 21}, {"label": "South West", "value": 21}, {"label": "Greater London", "value": 20}, {"label": "North East", "value": 19}, {"label": "East Midlands", "value": 16}], "status": [{"label": "Active", "value": 210}, {"label": "Lapsed (24m+)", "value": 110}, {"label": "Never donated", "value": 26}], "museum_trend": [{"label": 2022, "value": 47062551}, {"label": 2023, "value": 57522944}, {"label": 2024, "value": 61231129}], "museum_yoy_top5": [{"label": "Southbank Centre", "value": 16.9}, {"label": "Royal Botanic Gardens, Kew", "value": 15.2}, {"label": "V&A South Kensington", "value": 13.4}, {"label": "Somerset House", "value": 12.7}, {"label": "British Museum", "value": 11.3}], "museum_yoy_bottom5": [{"label": "Royal Museums Greenwich", "value": -11.5}, {"label": "Science Museum", "value": -4.4}, {"label": "Tate Modern", "value": -2.9}, {"label": "St Paul's Cathedral", "value": -0.4}, {"label": "Crown Estate, Windsor Great Park", "value": 3.3}]};
+
+const tooltip = document.getElementById('tooltip');
+function showTip(evt, text) {
+  tooltip.textContent = text;
+  tooltip.style.left = (evt.pageX + 12) + 'px';
+  tooltip.style.top = (evt.pageY - 24) + 'px';
+  tooltip.style.opacity = 1;
+}
+function hideTip() { tooltip.style.opacity = 0; }
+
+function fmt(n) {
+  if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(0) + 'k';
+  return n.toString();
+}
+function fmtGBP(n) { return '£' + fmt(n); }
+
+// ---- KPI tiles ----
+const kpis = DATA.kpis;
+document.getElementById('kpis').innerHTML = `
+  <div class="kpi"><div class="label">Supporters (cleaned)</div><div class="value">${kpis.supporters}</div><div class="sub">${kpis.duplicates_removed} duplicate records removed</div></div>
+  <div class="kpi"><div class="label">Total raised</div><div class="value">${fmtGBP(kpis.total_raised)}</div><div class="sub">across all tiers</div></div>
+  <div class="kpi"><div class="label">Data-quality issues found</div><div class="value">${kpis.issues_found}</div><div class="sub">audited &amp; resolved via SQL</div></div>
+  <div class="kpi"><div class="label">UK sector visits, 2024</div><div class="value">${fmt(kpis.museum_2024_total)}</div><div class="sub">20 benchmark institutions</div></div>
+`;
+
+// ---- Generic horizontal bar chart ----
+function hBarChart(svgId, rows, {valueFmt=fmt, negRed=false} = {}) {
+  const svg = document.getElementById(svgId);
+  const W = 480, H = rows.length * 34 + 20, leftPad = 170, rightPad = 60, top = 10;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const maxAbs = Math.max(...rows.map(r => Math.abs(r.value)), 1);
+  const scale = (W - leftPad - rightPad) / maxAbs;
+  let svgContent = '';
+  rows.forEach((r, i) => {
+    const y = top + i * 34;
+    const barW = Math.abs(r.value) * scale;
+    const negative = r.value < 0;
+    const x = negative ? leftPad - barW : leftPad;
+    svgContent += `<text x="${leftPad - 8}" y="${y + 15}" text-anchor="end" class="axis-label">${r.label}</text>`;
+    svgContent += `<rect class="bar ${negative && negRed ? 'neg' : ''}" x="${x}" y="${y}" width="${Math.max(barW,1)}" height="20" rx="3"
+                    data-tip="${r.label}: ${valueFmt(r.value)}"></rect>`;
+    const labelX = negative ? x - 6 : x + barW + 6;
+    svgContent += `<text x="${labelX}" y="${y + 15}" text-anchor="${negative ? 'end':'start'}" class="value-label">${valueFmt(r.value)}</text>`;
+  });
+  svgContent += `<line class="baseline" x1="${leftPad}" y1="${top-4}" x2="${leftPad}" y2="${H-6}"></line>`;
+  svg.innerHTML = svgContent;
+  svg.querySelectorAll('.bar').forEach(el => {
+    el.addEventListener('mousemove', e => showTip(e, el.dataset.tip));
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+
+hBarChart('chart-tier', DATA.tier, {valueFmt: fmtGBP});
+hBarChart('chart-region', DATA.region, {valueFmt: v => String(v)});
+
+// ---- Status donut-ish stacked bar (categorical identity, 3 segments) ----
+(function () {
+  const svg = document.getElementById('chart-status');
+  const total = DATA.status.reduce((s,r)=>s+r.value,0);
+  const W = 480, H = 90, top = 30, barH = 36;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const colors = ['status-1','status-2','status-3'];
+  let x = 0, content = '';
+  const gap = 2;
+  DATA.status.forEach((r, i) => {
+    const w = (r.value/total) * (W - (DATA.status.length-1)*gap);
+    content += `<rect class="${colors[i%3]}" x="${x}" y="${top}" width="${w}" height="${barH}" rx="4"
+                 data-tip="${r.label}: ${r.value} (${Math.round(r.value/total*100)}%)"></rect>`;
+    x += w + gap;
+  });
+  svg.innerHTML = content;
+  svg.querySelectorAll('rect').forEach(el => {
+    el.addEventListener('mousemove', e => showTip(e, el.dataset.tip));
+    el.addEventListener('mouseleave', hideTip);
+  });
+  document.getElementById('legend-status').innerHTML = DATA.status.map((r,i) =>
+    `<span><span class="sw status-${(i%3)+1}" style="background:var(--series-${(i%3)+1})"></span>${r.label} — ${r.value}</span>`
+  ).join('');
+})();
+
+// ---- Trend line chart ----
+(function () {
+  const svg = document.getElementById('chart-trend');
+  const W = 480, H = 220, leftPad = 50, rightPad = 20, top = 20, bottom = 30;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const rows = DATA.museum_trend;
+  const maxV = Math.max(...rows.map(r=>r.value));
+  const minV = 0;
+  const xStep = (W - leftPad - rightPad) / (rows.length - 1);
+  const yFor = v => top + (1 - (v - minV) / (maxV - minV)) * (H - top - bottom);
+  let gridContent = '';
+  for (let g = 0; g <= 4; g++) {
+    const gy = top + g * (H - top - bottom) / 4;
+    gridContent += `<line class="grid-line" x1="${leftPad}" y1="${gy}" x2="${W-rightPad}" y2="${gy}"></line>`;
+  }
+  let points = rows.map((r,i) => [leftPad + i*xStep, yFor(r.value)]);
+  let path = points.map((p,i) => (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  let dots = '';
+  rows.forEach((r,i) => {
+    const [x,y] = points[i];
+    dots += `<circle class="dot" cx="${x}" cy="${y}" r="4" data-tip="${r.label}: ${fmt(r.value)} visits"></circle>`;
+    dots += `<text x="${x}" y="${H-bottom+18}" text-anchor="middle" class="axis-label">${r.label}</text>`;
+    dots += `<text x="${x}" y="${y-10}" text-anchor="middle" class="value-label">${fmt(r.value)}</text>`;
+  });
+  svg.innerHTML = gridContent + `<path class="line-path" d="${path}"></path>` + dots;
+  svg.querySelectorAll('.dot').forEach(el => {
+    el.addEventListener('mousemove', e => showTip(e, el.dataset.tip));
+    el.addEventListener('mouseleave', hideTip);
+  });
+})();
+
+// ---- YoY gainers/decliners combined bar ----
+(function () {
+  const rows = [...DATA.museum_yoy_top5, ...DATA.museum_yoy_bottom5.slice().reverse()];
+  const svg = document.getElementById('chart-yoy');
+  const W = 900, H = rows.length * 30 + 20, leftPad = 260, rightPad = 60, top = 10;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const maxAbs = Math.max(...rows.map(r => Math.abs(r.value)), 1);
+  const mid = leftPad + (W - leftPad - rightPad) / 2;
+  const half = (W - leftPad - rightPad) / 2;
+  let content = '';
+  rows.forEach((r, i) => {
+    const y = top + i * 30;
+    const barW = Math.abs(r.value)/maxAbs * half;
+    const negative = r.value < 0;
+    const x = negative ? mid - barW : mid;
+    content += `<text x="${leftPad - 10}" y="${y + 15}" text-anchor="end" class="axis-label">${r.label}</text>`;
+    content += `<rect class="bar ${negative?'neg':''}" x="${x}" y="${y}" width="${Math.max(barW,1)}" height="18" rx="3"
+                 data-tip="${r.label}: ${r.value > 0 ? '+' : ''}${r.value}%"></rect>`;
+    const labelX = negative ? x - 6 : x + barW + 6;
+    content += `<text x="${labelX}" y="${y+14}" text-anchor="${negative?'end':'start'}" class="value-label">${r.value > 0 ? '+' : ''}${r.value}%</text>`;
+  });
+  content += `<line class="baseline" x1="${mid}" y1="${top-4}" x2="${mid}" y2="${H-6}"></line>`;
+  svg.innerHTML = content;
+  svg.querySelectorAll('.bar').forEach(el => {
+    el.addEventListener('mousemove', e => showTip(e, el.dataset.tip));
+    el.addEventListener('mouseleave', hideTip);
+  });
+})();
+</script>
+</body>
+</html>
